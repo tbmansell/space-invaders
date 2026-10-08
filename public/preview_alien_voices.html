@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Invaders - Alien Voice Transmission Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060810;
+      --card-bg: rgba(13, 20, 36, 0.88);
+      --border-cyan: #00e5ff;
+      --alien-magenta: #ff007f;
+      --neon-green: #00ff66;
+      --warning-red: #ff3344;
+      --solar-gold: #ffd700;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #151b33 0%, var(--bg) 80%);
+      color: #e0f7fa;
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.25rem;
+      color: var(--alien-magenta);
+      text-shadow: 0 0 12px var(--alien-magenta), 0 0 24px rgba(255, 0, 127, 0.5);
+      margin-bottom: 8px;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .subtitle {
+      color: #8fa0c0;
+      margin-bottom: 28px;
+      text-align: center;
+      max-width: 650px;
+      font-size: 0.95rem;
+    }
+    .container {
+      max-width: 780px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 229, 255, 0.05);
+      border-radius: 8px;
+      padding: 22px;
+      position: relative;
+    }
+    .card-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--border-cyan);
+    }
+    .quote-box {
+      background: rgba(0, 0, 0, 0.5);
+      border-left: 3px solid var(--alien-magenta);
+      padding: 10px 14px;
+      margin: 12px 0 16px;
+      font-size: 1.05rem;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    button {
+      background: #0f1c30;
+      color: #fff;
+      border: 1px solid var(--border-cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: bold;
+      padding: 12px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    button:hover {
+      background: var(--border-cyan);
+      color: #000;
+      box-shadow: 0 0 12px var(--border-cyan);
+      transform: translateY(-1px);
+    }
+    button.btn-accent {
+      border-color: var(--alien-magenta);
+      color: #ff99cc;
+    }
+    button.btn-accent:hover {
+      background: var(--alien-magenta);
+      color: #fff;
+      box-shadow: 0 0 15px var(--alien-magenta);
+    }
+    button.btn-gold {
+      border-color: var(--solar-gold);
+      color: #ffe680;
+    }
+    button.btn-gold:hover {
+      background: var(--solar-gold);
+      color: #000;
+      box-shadow: 0 0 15px var(--solar-gold);
+    }
+    .active-badge {
+      font-size: 0.65rem;
+      background: var(--neon-green);
+      color: #000;
+      padding: 3px 6px;
+      border-radius: 3px;
+      font-family: 'Press Start 2P', monospace;
+    }
+    .waveform-visualizer {
+      height: 48px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 0 12px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+    .bar {
+      width: 4px;
+      height: 6px;
+      background: var(--border-cyan);
+      border-radius: 2px;
+      transition: height 0.08s ease;
+    }
+    .hud-notification {
+      background: rgba(255, 0, 127, 0.15);
+      border: 1px solid var(--alien-magenta);
+      color: #ffb3d9;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-top: 12px;
+      font-size: 0.95rem;
+      display: none;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      from { box-shadow: 0 0 6px rgba(255, 0, 127, 0.3); }
+      to { box-shadow: 0 0 16px rgba(255, 0, 127, 0.7); }
+    }
+    .status-text {
+      font-size: 0.85rem;
+      color: #64ffda;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+    .back-link {
+      margin-top: 24px;
+      color: var(--border-cyan);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>👾 ALIEN TRANSMISSION STUDIO 👾</h1>
+  <p class="subtitle">Space Invaders New Wave Incoming Voice Transmission System</p>
+
+  <div class="container">
+    <div class="card">
+      <div class="card-title">
+        <span>TRANSMITTED MESSAGE</span>
+        <span class="active-badge" id="active-style-badge">ACTIVE: GALACTIC OVERLORD</span>
+      </div>
+      <div class="quote-box">
+        "PUNY HUMANS... YOUR PLANET IS OURS!"
+      </div>
+      <p style="color: #a0aec0; font-size: 0.88rem;">
+        This battle cry plays when a new invasion wave starts, accompanied by the mothership approach sub-bass drone and emergency klaxons.
+      </p>
+
+      <div class="waveform-visualizer" id="visualizer">
+        <!-- Generated visualizer bars -->
+      </div>
+      <div class="status-text" id="status-display">Click any voice style below to preview transmission...</div>
+      <div class="hud-notification" id="hud-alert">
+        👾 ALIEN TRANSMISSION DETECTED: "PUNY HUMANS, YOUR PLANET IS OURS!"
+      </div>
+    </div>
+
+    <!-- Voice Variations Grid -->
+    <div class="card">
+      <div class="card-title">
+        <span>SELECT ALIEN VOICE VARIATION</span>
+      </div>
+
+      <div class="btn-grid">
+        <button class="btn-accent" onclick="playVoice('overlord')">
+          👑 1. Galactic Overlord (Default)
+        </button>
+        <button class="btn-gold" onclick="playVoice('arcade8bit')">
+          🕹️ 2. 8-Bit Retro Arcade (Sinistar/Berzerk)
+        </button>
+        <button onclick="playVoice('cybernetic')">
+          ⚡ 3. Cybernetic Hive Mind
+        </button>
+        <button onclick="playVoice('speechsynth')">
+          🗣️ 4. In-Browser Speech Synth Fallback
+        </button>
+      </div>
+
+      <div style="margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+        <button class="btn-accent" style="width: 100%; font-size: 1rem; padding: 14px;" onclick="simulateWaveStart()">
+          🚨 SIMULATE FULL WAVE START COMBAT SEQUENCE (Klaxon + Alien Voice + HUD)
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>ABOUT THE SYNTHESIS ENGINE</span>
+      </div>
+      <p style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.6;">
+        • <strong>DSP Chain:</strong> Processed with custom Python DSP using pitch-resampling, 45Hz Dalek ring modulation, comb filter throat resonance, bitcrush arcade quantization, and 14ms stereo slapback spread.<br>
+        • <strong>Zero-Latency Web Audio API:</strong> Preloaded directly into an uncompressed <code>AudioBuffer</code> in memory on game start, ensuring immediate synchronization with game frames and volume controls.<br>
+        • <strong>Automatic Fallback:</strong> If audio files are disabled or loading, the engine automatically uses <code>window.speechSynthesis</code> with low-pitch modulation.
+      </p>
+    </div>
+
+    <a href="/" class="back-link">◀ RETURN TO SPACE INVADERS ARCADE</a>
+  </div>
+
+  <script src="js/audio.js"></script>
+  <script>
+    // Build visualizer bars
+    const viz = document.getElementById('visualizer');
+    const bars = [];
+    for (let i = 0; i < 48; i++) {
+      const b = document.createElement('div');
+      b.className = 'bar';
+      viz.appendChild(b);
+      bars.push(b);
+    }
+
+    let animId = null;
+    function animateBars(active) {
+      if (!active) {
+        if (animId) cancelAnimationFrame(animId);
+        bars.forEach(b => b.style.height = '6px');
+        return;
+      }
+      function frame() {
+        bars.forEach((b, i) => {
+          const h = 6 + Math.random() * 38;
+          b.style.height = `${h}px`;
+        });
+        animId = requestAnimationFrame(frame);
+      }
+      frame();
+    }
+
+    function setStatus(text) {
+      document.getElementById('status-display').innerText = text;
+    }
+
+    function showHudAlert() {
+      const el = document.getElementById('hud-alert');
+      el.style.display = 'block';
+      setTimeout(() => {
+        el.style.display = 'none';
+      }, 4500);
+    }
+
+    function playVoice(style) {
+      Sound.unlock();
+      animateBars(true);
+      showHudAlert();
+
+      if (style === 'speechsynth') {
+        setStatus('Playing procedural Web Speech Synth fallback (pitch 0.22, rate 0.72)...');
+        Sound.playAlienVoiceProcedural();
+        setTimeout(() => animateBars(false), 3800);
+        return;
+      }
+
+      setStatus(`Loading & playing [${style.toUpperCase()}] alien voice...`);
+      Sound.setAlienVoiceStyle(style);
+      
+      const badge = document.getElementById('active-style-badge');
+      if (style === 'overlord') badge.innerText = 'ACTIVE: GALACTIC OVERLORD';
+      if (style === 'arcade8bit') badge.innerText = 'ACTIVE: 8-BIT RETRO ARCADE';
+      if (style === 'cybernetic') badge.innerText = 'ACTIVE: CYBERNETIC HIVE MIND';
+
+      setTimeout(() => {
+        Sound.playAlienVoice({ delay: 0 });
+        setTimeout(() => animateBars(false), 4400);
+      }, 50);
+    }
+
+    function simulateWaveStart() {
+      Sound.unlock();
+      animateBars(true);
+      setStatus('🚨 ALARM: Triple Red-Alert Klaxon Pulses firing... Alien transmission incoming!');
+      showHudAlert();
+
+      Sound.playWaveWarning();
+      Sound.playAlienVoice({ delay: 0.25 });
+
+      setTimeout(() => {
+        animateBars(false);
+        setStatus('Sequence complete. Alien invasion wave active!');
+      }, 4800);
+    }
+  </script>
+</body>
+</html>

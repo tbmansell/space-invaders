@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Space Invaders - Multiplayer Arcade</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="arcade-cabinet">
+    <!-- Top Header Marquee -->
+    <header class="arcade-header">
+      <div class="marquee-item">
+        <span class="label">SCORE</span>
+        <span id="player-score" class="val glow-cyan">0000</span>
+      </div>
+      <div class="marquee-item">
+        <span class="label">HI-SCORE</span>
+        <span id="high-score" class="val glow-red">0000</span>
+      </div>
+      <div class="marquee-item">
+        <span class="label">WAVE</span>
+        <span id="wave-num" class="val glow-yellow">01</span>
+      </div>
+      <div class="marquee-item squad-item" id="marquee-squad" title="View Defense Squad & Chat">
+        <span class="label">SQUAD <span class="mobile-hint">(TAP)</span></span>
+        <span id="player-count" class="val glow-green">0 PILOTS</span>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main class="arcade-screen-container">
+      <div class="arcade-screen" id="arcade-screen">
+        <canvas id="game-canvas" width="800" height="850"></canvas>
+        <div class="crt-overlay" id="crt-overlay"></div>
+
+        <!-- In-game Notification Banner -->
+        <div id="game-banner" class="game-banner hidden">
+          <h2 id="banner-title">EARTH INVADED!</h2>
+          <p id="banner-subtitle">PRESS SPACE TO DEPLOY AGAIN</p>
+        </div>
+
+        <!-- Chat Feed Overlay -->
+        <div id="chat-feed" class="chat-feed"></div>
+
+        <!-- Player Join/Leave Event Feed (Top Right of Playable Area) -->
+        <div id="event-feed" class="event-feed"></div>
+
+        <!-- Faint Touch Controls (Just beneath player spaceships) -->
+        <div id="screen-controls" class="screen-controls">
+          <button id="btn-screen-left" class="faint-btn btn-left" aria-label="Move Left">◀</button>
+          <button id="btn-screen-fire" class="faint-btn btn-fire" aria-label="Fire Missile">FIRE</button>
+          <button id="btn-screen-right" class="faint-btn btn-right" aria-label="Move Right">▶</button>
+        </div>
+      </div>
+
+      <!-- Squad Leaderboard & Radio Sidebar / Mobile Slide Drawer -->
+      <aside class="squad-panel" id="squad-panel">
+        <div class="panel-header-mobile">
+          <span class="panel-header-mobile-title">📡 DEFENSE SQUAD & COMMS</span>
+          <button id="btn-close-squad" class="squad-close-btn" aria-label="Close panel">✕</button>
+        </div>
+
+        <div class="panel-section">
+          <h3 class="panel-title">📡 DEFENSE SQUAD</h3>
+          <ul id="squad-list" class="squad-list">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+
+        <div class="panel-section chat-section">
+          <h3 class="panel-title">💬 CHAT</h3>
+          <form id="chat-form" class="chat-form">
+            <input 
+              type="text" 
+              id="input-chat" 
+              maxlength="50" 
+              placeholder="Type message & press Enter..." 
+              autocomplete="off" 
+              spellcheck="false" 
+              enterkeyhint="send"
+            >
+          </form>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Mobile Slide Drawer Backdrop -->
+    <div id="squad-backdrop" class="squad-backdrop hidden"></div>
+
+    <!-- Bottom Controls & Utility Toolbar -->
+    <footer class="arcade-toolbar">
+      <div class="tool-group">
+        <button id="btn-sound" class="tool-btn active">🔊 SOUND: ON</button>
+        <button id="btn-open-squad" class="tool-btn">💬 CHAT</button>
+        <a href="/preview_alien_voices.html" target="_blank" class="tool-btn" style="text-decoration: none; display: inline-flex; align-items: center;" title="Alien Voice Studio">👾 VOICES</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Player Join Callsign Modal (Required before playing) -->
+  <div id="modal-join" class="modal-backdrop">
+    <div class="modal-card">
+      <h2 class="modal-title">👾 PILOT REGISTRATION 👾</h2>
+      <p class="modal-intro">ENTER YOUR CALLSIGN TO DEPLOY TO BATTLE:</p>
+      <form id="form-join">
+        <div class="form-group">
+          <label for="input-join-name">PILOT CALLSIGN:</label>
+          <input type="text" id="input-join-name" maxlength="15" placeholder="e.g. Maverick" required autocomplete="off" autofocus>
+        </div>
+        <div class="form-group" style="margin-top: 10px;">
+          <label>CANNON COLOR:</label>
+          <div id="join-color-palette" class="color-palette">
+            <button type="button" class="color-swatch selected" data-color="#00ff66" style="background:#00ff66;"></button>
+            <button type="button" class="color-swatch" data-color="#00e5ff" style="background:#00e5ff;"></button>
+            <button type="button" class="color-swatch" data-color="#ff007f" style="background:#ff007f;"></button>
+            <button type="button" class="color-swatch" data-color="#ffd700" style="background:#ffd700;"></button>
+            <button type="button" class="color-swatch" data-color="#ff6600" style="background:#ff6600;"></button>
+            <button type="button" class="color-swatch" data-color="#b026ff" style="background:#b026ff;"></button>
+            <button type="button" class="color-swatch" data-color="#e0f7fa" style="background:#e0f7fa;"></button>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 16px;">
+          <button type="submit" id="btn-join-deploy" class="primary-btn">🚀 DEPLOY TO BATTLE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/sprites.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
